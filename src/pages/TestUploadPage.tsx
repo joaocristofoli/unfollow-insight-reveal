@@ -13,9 +13,11 @@ export default function TestUploadPage() {
   const [isDragging, setIsDragging] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorDetails, setErrorDetails] = useState<any>(null)
 
   const handleFileSelect = (selectedFile: File) => {
     setError(null)
+    setErrorDetails(null)
     
     // Validate file type
     if (!selectedFile.name.endsWith('.zip')) {
@@ -64,6 +66,7 @@ export default function TestUploadPage() {
 
     setIsProcessing(true)
     setError(null)
+    setErrorDetails(null)
 
     try {
       // Create form data with file
@@ -81,12 +84,30 @@ export default function TestUploadPage() {
       })
 
       if (!response.ok) {
-        throw new Error('Falha no processamento do arquivo')
+        const errorText = await response.text()
+        console.error('Response não OK:', {
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText
+        })
+        setErrorDetails({
+          status: response.status,
+          statusText: response.statusText,
+          body: errorText,
+          timestamp: new Date().toISOString()
+        })
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
       }
 
       const result = await response.json()
+      console.log('Resultado da API:', result)
       
       if (!result.success) {
+        console.error('Resultado com erro:', result)
+        setErrorDetails({
+          apiError: result,
+          timestamp: new Date().toISOString()
+        })
         throw new Error(result.error || 'Erro no processamento')
       }
 
@@ -98,7 +119,16 @@ export default function TestUploadPage() {
       // Navigate to test results page directly (skip payment)
       navigate('/test-results')
     } catch (err) {
-      console.error('Erro:', err)
+      console.error('Erro completo:', err)
+      setErrorDetails(prev => ({
+        ...prev,
+        catchError: {
+          message: err.message,
+          stack: err.stack,
+          name: err.name
+        },
+        timestamp: new Date().toISOString()
+      }))
       setError(err.message || 'Erro ao processar o arquivo. Tente novamente.')
     } finally {
       setIsProcessing(false)
@@ -195,10 +225,28 @@ export default function TestUploadPage() {
 
         {/* Error Alert */}
         {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
+          <div className="space-y-4 mb-6">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+            
+            {errorDetails && (
+              <Card className="bg-destructive/5 border-destructive/20">
+                <CardHeader>
+                  <CardTitle className="text-sm text-destructive">Detalhes do Erro (para debugging)</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <pre className="text-xs overflow-auto bg-muted p-4 rounded text-muted-foreground whitespace-pre-wrap">
+                    {JSON.stringify(errorDetails, null, 2)}
+                  </pre>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Copie e cole este log completo para o desenvolvedor.
+                  </p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         )}
 
         {/* Process Button */}
