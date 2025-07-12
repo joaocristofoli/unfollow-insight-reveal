@@ -18,18 +18,13 @@ import { useToast } from '@/hooks/use-toast'
 export default function ResultsPage() {
   const navigate = useNavigate()
   const { toast } = useToast()
-  const [stats, setStats] = useState({ notFollowingBack: 0 })
+  const [stats, setStats] = useState({ 
+    notFollowingBack: 0, 
+    totalFollowing: 0, 
+    totalFollowers: 0 
+  })
   const [copied, setCopied] = useState(false)
-  
-  // Mock data for demo - in real app, this would come from file processing
-  const notFollowingBackList = [
-    { username: 'exemplo_usuario1', url: 'https://instagram.com/exemplo_usuario1' },
-    { username: 'fulano123', url: 'https://instagram.com/fulano123' },
-    { username: 'outra_pessoa', url: 'https://instagram.com/outra_pessoa' },
-    { username: 'usuario_teste', url: 'https://instagram.com/usuario_teste' },
-    { username: 'perfil_exemplo', url: 'https://instagram.com/perfil_exemplo' },
-    { username: 'teste123', url: 'https://instagram.com/teste123' },
-  ]
+  const [notFollowingBackList, setNotFollowingBackList] = useState<Array<{username: string, url: string}>>([])
 
   useEffect(() => {
     // Check payment status
@@ -39,9 +34,16 @@ export default function ResultsPage() {
       return
     }
 
-    const statsData = sessionStorage.getItem('analysisStats')
-    if (statsData) {
-      setStats(JSON.parse(statsData))
+    // Load analysis results from session storage
+    const resultsData = sessionStorage.getItem('analysisResults')
+    if (resultsData) {
+      const results = JSON.parse(resultsData)
+      setStats({
+        notFollowingBack: results.not_following_back,
+        totalFollowing: results.total_following,
+        totalFollowers: results.total_followers
+      })
+      setNotFollowingBackList(results.not_following_back_list || [])
     }
   }, [navigate])
 

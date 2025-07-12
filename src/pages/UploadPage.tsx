@@ -66,17 +66,36 @@ export default function UploadPage() {
     setError(null)
 
     try {
-      // Simulate file processing
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Create form data with file
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('fileName', file.name)
+
+      // Call edge function to process file
+      const response = await fetch('https://grtkmwuupfhmhurhqzcf.supabase.co/functions/v1/process-instagram', {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!response.ok) {
+        throw new Error('Falha no processamento do arquivo')
+      }
+
+      const result = await response.json()
       
-      // Store file for processing in the next step
-      sessionStorage.setItem('uploadedFile', file.name)
-      sessionStorage.setItem('fileSize', file.size.toString())
+      if (!result.success) {
+        throw new Error(result.error || 'Erro no processamento')
+      }
+
+      // Store analysis results
+      sessionStorage.setItem('analysisId', result.analysisId)
+      sessionStorage.setItem('analysisResults', JSON.stringify(result.results))
       
       // Navigate to preview page
       navigate('/preview')
     } catch (err) {
-      setError('Erro ao processar o arquivo. Tente novamente.')
+      console.error('Erro:', err)
+      setError(err.message || 'Erro ao processar o arquivo. Tente novamente.')
     } finally {
       setIsProcessing(false)
     }
