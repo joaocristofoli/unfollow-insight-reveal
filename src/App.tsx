@@ -10,6 +10,8 @@ import UploadPage from "./pages/UploadPage";
 import PreviewPage from "./pages/PreviewPage";
 import PaymentPage from "./pages/PaymentPage";
 import ResultsPage from "./pages/ResultsPage";
+import TestUploadPage from "./pages/TestUploadPage";
+import TestResultsPage from "./pages/TestResultsPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
             <Route path="/preview" element={<PreviewPage />} />
             <Route path="/payment" element={<PaymentPage />} />
             <Route path="/results" element={<ResultsPage />} />
+            <Route path="/test-upload" element={<TestUploadPage />} />
+            <Route path="/test-results" element={<TestResultsPage />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
