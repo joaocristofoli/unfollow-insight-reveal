@@ -74,6 +74,9 @@ export default function UploadPage() {
       // Call edge function to process file
       const response = await fetch('https://grtkmwuupfhmhurhqzcf.supabase.co/functions/v1/process-instagram', {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdydGttd3V1cGZobWh1cmhxemNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTIzNDIwMjcsImV4cCI6MjA2NzkxODAyN30.EdCwuD4iYwIi-Ao6RLYy7mUkRqCbF8wRbwqT641T6-M`,
+        },
         body: formData,
       })
 
