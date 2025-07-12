@@ -74,8 +74,12 @@ serve(async (req) => {
       }),
     });
 
+    console.log(`OpenAI Response Status: ${openAIResponse.status}`);
+    
     if (!openAIResponse.ok) {
-      throw new Error('Falha na geração de dados da análise');
+      const errorText = await openAIResponse.text();
+      console.error('OpenAI API Error:', errorText);
+      throw new Error(`Falha na API OpenAI: ${openAIResponse.status} - ${errorText}`);
     }
 
     const openAIData = await openAIResponse.json();
